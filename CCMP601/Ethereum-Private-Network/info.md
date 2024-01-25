@@ -1,0 +1,10 @@
+### Node 1
+Public Address: 0x05255103599F710AdB8A14603AD4c9e2c0B6316A
+Password: 123
+
+### Node 2
+Public Address: 0x47B9460EE4780DA710aF9156e200817525345c37
+Password: 123
+
+### Bootnode
+enode://ffa207f30f51b9ceddb82d7677009657b55cc47c21619f684e0aaa885a4b5345d7a4939f87be1f2e069cb8a6996dbcae6e7cfbb5ff25d6859dd692c27d5b59af@127.0.0.1:0?discport=30305

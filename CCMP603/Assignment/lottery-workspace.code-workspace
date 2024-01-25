@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../CCMP-601/my-app/src"
+		},
+		{
+			"path": "lottery-back-end"
+		},
+		{
+			"path": "lottery-react"
+		},
+		{
+			"path": "lottery-front-end"
+		}
+	],
+	"settings": {}
+}
