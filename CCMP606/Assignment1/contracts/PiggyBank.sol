@@ -5,7 +5,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-// My contract address:  0xAD45EF90803D39a67059c1BAf512cfd672B43485
+// My contract address: 0xAD45EF90803D39a67059c1BAf512cfd672B43485
+// Piggy bank address:  0xDA892dC67fc29a977B549E0082f04b74D28c750E
 
 contract PiggyBank {
 
@@ -53,8 +54,8 @@ contract PiggyBank {
     // -- Note: you will need to use address(this).balance which returns the balance in Wei.
     // -- 1 Eth = 1 * 10**18 Wei
     function getBalance() public view returns (uint) {
-        uint balance = address(this).balance * 10**18;
-        return balance;// deposits[msg.sender];
+        uint balance = address(this).balance;
+        return balance;
     }
 
 
