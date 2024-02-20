@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 from django.contrib.auth.models import User, Group
 from django.contrib.auth import authenticate
 from rest_framework.viewsets import ModelViewSet
@@ -23,7 +23,7 @@ def login(request):
     password = request.data['password']
     user = authenticate(username=username, password=password)
     if user is not None:
-        user.last_login = datetime.datetime.now()
+        user.last_login = timezone.now
         user.save()
         token, obj = Token.objects.get_or_create(user=user)
         group = GroupSerializer(user.groups.filter(user=user), many=True).data

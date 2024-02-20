@@ -1,4 +1,9 @@
 import os
+from uuid import uuid1, uuid4
+
+
+def uuid1_name():
+    return str(uuid4()).replace('-', '')[:15]
 
 
 # save upload file from a POST request and return file name

@@ -23,7 +23,8 @@ INSERT INTO auth_group (id,name)
 VALUES (4, 'delivery');
 
 
-python manage.py makemigrations
+rm -rf ManageAPI/migrations
+python manage.py makemigrations ManageAPI
 python manage.py migrate
 
 python manage.py createsuperuser
