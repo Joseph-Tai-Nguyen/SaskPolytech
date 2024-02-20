@@ -29,6 +29,7 @@
 *.log
 *.sql
 *.sqlite
+/log
 
 # OS generated files #
 ######################
@@ -39,3 +40,24 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+.idea/workspace.xml
+
+# Django #
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+.env
+.env.default
+
+# Visual Studio Code #
+.vscode/
+
+# Git #
+.gitignore
+*.pyc
+*.pdf
+*.jpg
+
+# Virtual Environment #
+venv

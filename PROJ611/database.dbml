@@ -1,0 +1,3 @@
+Project flash_local_express {
+  database_type: 'PostgreSQL'
+}
