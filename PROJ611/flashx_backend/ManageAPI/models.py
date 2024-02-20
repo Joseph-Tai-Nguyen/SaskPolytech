@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from .enums import InvoiceStatus
@@ -21,8 +20,8 @@ class Delivery(models.Model):
 
 
 class Image(Base):
+    unique_name = models.CharField(max_length=200, null=True)
     name = models.CharField(max_length=100, null=True)
-    path = models.CharField(max_length=200, default='')
 
 
 class Store(Base):
@@ -54,9 +53,11 @@ class Invoice(Base):
     courier = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='invoice_courier')
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     status = models.CharField(max_length=20, choices=InvoiceChoices.choices, default=InvoiceChoices.CREATED)
+    inv_images = models.ManyToManyField(Image, null=True, blank=True, related_name='invoice_images')
+    evi_images = models.ManyToManyField(Image, null=True, blank=True, related_name='evidence_images')
 
 
-class InvoiceImage(Base):
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
-    invoice_image = models.ForeignKey(Image, on_delete=models.CASCADE, null=True, blank=True, related_name='invoice_image')
-    evidence_image = models.ForeignKey(Image, on_delete=models.CASCADE, null=True, blank=True, related_name='evidence_image')
+# class InvoiceImage(Base):
+#     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+#     invoice_image = models.ForeignKey(Image, on_delete=models.CASCADE, null=True, blank=True, related_name='invoice_image')
+#     evidence_image = models.ForeignKey(Image, on_delete=models.CASCADE, null=True, blank=True, related_name='evidence_image')

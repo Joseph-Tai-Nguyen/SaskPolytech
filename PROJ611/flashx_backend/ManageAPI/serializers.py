@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User, Group
-from .models import Delivery, Staff, Invoice, Image, InvoiceImage, Store
+from .models import Delivery, Staff, Invoice, Image, Store, Store_Staff
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -45,6 +45,11 @@ class StoreSerializer(serializers.ModelSerializer):
         model = Store
         fields = "__all__"
 
+class StoreStaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store_Staff
+        fields = "__all__"
+
 
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,9 +57,9 @@ class InvoiceSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class InvoiceImageSerializer(serializers.ModelSerializer):
-    image = ImageSerializer()
-    class Meta:
-        model = InvoiceImage
-        fields = "__all__"
+# class InvoiceImageSerializer(serializers.ModelSerializer):
+#     image = ImageSerializer()
+#     class Meta:
+#         model = InvoiceImage
+#         fields = "__all__"
 

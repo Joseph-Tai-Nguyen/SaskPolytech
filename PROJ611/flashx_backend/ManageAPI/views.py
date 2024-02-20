@@ -11,8 +11,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from ManageAPI import services
 from .serializers import OwnerSerializer, DeliverySerializer, InvoiceSerializer, StaffSerializer, \
-      GroupSerializer, ImageSerializer, InvoiceImageSerializer, StoreSerializer
-from .models import Staff, Delivery, Invoice, InvoiceImage, Image, Store
+      GroupSerializer, ImageSerializer, StoreSerializer, StoreStaffSerializer
+from .models import Staff, Delivery, Invoice, Image, Store, Store_Staff
 from . import services, permissions
 from django.http import HttpResponse
 
@@ -238,11 +238,340 @@ class StaffViewSet(ModelViewSet):
     serializer_class = StaffSerializer
     queryset = Staff.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            result = services.ManageServices.create_staff(
+                username=data['username'],
+                password=data['password'],
+                email=data['email'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                is_active=data['is_active'],
+                group_name=data['group']
+            )
+            if result is not None:
+                return Response({'status': 'New staff has been added'}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'error': 'Cannot create new staff'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print('EXCEPTION')
+            print(e)
+            return Response({'error': 'Cannot create new staff'}, status=500)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        staffid = kwargs['pk']
+
+        result = services.ManageServices.update_staff_delivery(
+            id=staffid,
+            username=data['username'],
+            # password=data['password'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            is_active=data['is_active'],
+            group_name=data['group'],
+            is_staff=True
+        )
+
+        if result is not None:
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'error': 'Fail to update tutor.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        staffid = kwargs['pk']
+        # get Staff
+        staff = Staff.objects.get(id=staffid)
+
+        # delete user
+        # delete cascade Staff
+        staff.user.delete()
+
+        return Response({'status': 'Staff deleted'}, status=status.HTTP_200_OK)
+
+    # @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated, ])
+    # def tutor_dashboard(self, request):
+    #     try:
+    #         user = request.user
+    #         tutor = Tutor.objects.get(user=user)
+    #         courses_list = Course.objects.filter(tutor=tutor)
+    #         events = SearchService.find_event_by_host(tutor)
+    #         response = {
+    #             'tutor': user.first_name + ' ' + user.last_name,
+    #             'tutor_id': tutor.id,
+    #             'num_courses': len(courses_list),
+    #             'num_events': len(events),
+    #             'num_students': len(courses_list)
+    #         }
+
+    #         return Response(response, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         print(e)
+    #         return Response(status=400)
+
+    def list(self, request, *args, **kwargs):
+        response = []
+
+        # get list Staff
+        staff_list = Staff.objects.all()
+        for staff in staff_list:
+            user = staff.user
+            group = GroupSerializer(user.groups.filter(user=user), many=True).data
+
+            if len(group) > 0:
+                dictionary = {
+                    'staffid': staff.id,
+                    'groups': group[0]['name'],
+                    'user': {
+                        "id": user.id,
+                        "last_login": user.last_login,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
+                        'is_staff': user.is_staff,
+                        'is_active': user.is_active,
+                        'date_joined': user.date_joined
+                    }
+                }
+            else:
+                dictionary = {
+                    'staffid': staff.id,
+                    'groups': 'no group',
+                    'user': {
+                        "id": user.id,
+                        "last_login": user.last_login,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
+                        'is_staff': user.is_staff,
+                        'is_active': user.is_active,
+                        'date_joined': user.date_joined
+                    }
+                }
+            response.append(dictionary)
+
+        return Response(response, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        staffid = kwargs['pk']
+        # get Staff
+        staff = Staff.objects.get(id=staffid)
+        user = staff.user
+        group = GroupSerializer(user.groups.filter(user=user), many=True).data
+
+        if len(group) > 0:
+            return Response({
+                'staffid': staff.id,
+                'groups': group[0]['name'],
+                'user': {
+                    "id": user.id,
+                    "last_login": user.last_login,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                    'is_active': user.is_active,
+                    'date_joined': user.date_joined
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'staffid': staff.id,
+                'groups': 'no group',
+                'user': {
+                    "id": user.id,
+                    "last_login": user.last_login,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                    'is_active': user.is_active,
+                    'date_joined': user.date_joined
+                }
+            }, status=status.HTTP_200_OK)
+
 
 class DeliveryViewSet(ModelViewSet):
     serializer_class = DeliverySerializer
     queryset = Delivery.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        data = request.data
+
+        result = services.ManageServices.create_delivery(
+            username=data['email'],
+            password=data['password'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            is_active=data['is_active'],
+            group_name=data['group']
+        )
+        if result is not None:
+            return Response({'status': 'New delivery has been added'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'error': 'Cannot create new delivery'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        deliveryid = kwargs['pk']
+
+        result = services.ManageServices.update_staff_delivery(
+            id=deliveryid,
+            username=data['email'],
+            # password=data['password'],
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            is_active=data['is_active'],
+            group_name=data['group'],
+            is_staff=False
+        )
+
+        if result is not None:
+            return Response(status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'error': 'Fail to update delivery.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        deliveryid = kwargs['pk']
+
+        # get Delivery
+        delivery = Delivery.objects.get(id=deliveryid)
+        # # get User
+        # user = User.objects.get(id=delivery.user.id)
+        # # delete Delivery
+        # delivery.delete()
+        # # delete user
+        # user.delete()
+
+        # delete user
+        # delete cascade Delivery
+        delivery.user.delete()
+
+        return Response({'status': 'Student deleted'}, status=status.HTTP_200_OK)
+
+    # @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated, ])
+    # def courses(self, request):
+    #     user = request.user
+    #     student = Student.objects.get(user=user)
+    #     courses_students = CourseStudent.objects.filter(student=student)
+    #     courses = []
+    #     for cs in courses_students:
+    #         courses.append(cs.course)
+    #     serializer = CourseSerializer(courses, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated, ])
+    # def student_dashboard(self, request):
+    #     try:
+    #         user = request.user
+    #         student = Student.objects.get(user=user)
+
+    #         courses = CourseStudent.objects.filter(student=student)
+    #         events = SearchService.find_event_by_participant(student)
+    #         response = {
+    #             'student': user.first_name + ' ' + user.last_name,
+    #             'num_tutors': len(courses),
+    #             'num_courses': len(courses),
+    #             'num_events': len(events)
+    #         }
+    #         return Response(response, status=200)
+
+    #     except Exception as e:
+    #         print(e)
+    #         return Response(status=500)
+
+    def list(self, request, *args, **kwargs):
+        response = []
+
+        # get list Delivery
+        delivery_list = Delivery.objects.all()
+        for delivery in delivery_list:
+            user = delivery.user
+            group = GroupSerializer(user.groups.filter(user=user), many=True).data
+
+            if len(group) > 0:
+                dictionary = {
+                    'deliveryid': delivery.id,
+                    'groups': group[0]['name'],
+                    'user': {
+                        "id": user.id,
+                        "last_login": user.last_login,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
+                        'is_staff': user.is_staff,
+                        'is_active': user.is_active,
+                        'date_joined': user.date_joined
+                    }
+                }
+            else:
+                dictionary = {
+                    'deliveryid': delivery.id,
+                    'groups': 'no group',
+                    'user': {
+                        "id": user.id,
+                        "last_login": user.last_login,
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'email': user.email,
+                        'is_staff': user.is_staff,
+                        'is_active': user.is_active,
+                        'date_joined': user.date_joined
+                    }
+                }
+            response.append(dictionary)
+
+        return Response(response, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, *args, **kwargs):
+        deliveryid = kwargs['pk']
+        # get Delivery
+        delivery = Delivery.objects.get(id = deliveryid)
+        user = delivery.user
+        group = GroupSerializer(user.groups.filter(user=user), many=True).data
+
+        if len(group) > 0:
+            return Response({
+                'deliveryid': delivery.id,
+                'groups': group[0]['name'],
+                'user': {
+                    "id": user.id,
+                    "last_login": user.last_login,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                    'is_active': user.is_active,
+                    'date_joined': user.date_joined
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'deliveryid': delivery.id,
+                'groups': 'no group',
+                'user': {
+                    "id": user.id,
+                    "last_login": user.last_login,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                    'is_active': user.is_active,
+                    'date_joined': user.date_joined
+                }
+            }, status=status.HTTP_200_OK)
 
 class GroupViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, ]
@@ -251,22 +580,7 @@ class GroupViewSet(ModelViewSet):
 
 
 class InvoiceViewSet(ModelViewSet):
-    permission_classes = [permissions.IsStaff]
+    permissions_classes = [IsAuthenticated]
     serializer_class = InvoiceSerializer
     queryset = Invoice.objects.all()
 
-    def destroy(self, request, *args, **kwargs):
-        invoiceid = kwargs['pk']
-        # get list Course
-        invoice_images = InvoiceImage.objects.filter(invoice_id=invoiceid)
-
-        for image in invoice_images:
-            # delete Invoice Image
-            image.delete()
-
-        # get Invoice
-        invoice = Invoice.objects.get(id=invoiceid)
-        # delete Invoice
-        invoice.delete()
-
-        return Response({'status': 'Invoice deleted'}, status=status.HTTP_200_OK)
