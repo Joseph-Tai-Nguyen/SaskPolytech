@@ -137,6 +137,7 @@ class ManageServices:
             phone = data['phone']
             address = data['address']
             city = data['city']
+            state = data['state']
             country = data['country']
             postal_code = data['postal_code']
             owner = models.User.objects.get(id=data['owner_id'])
@@ -145,6 +146,7 @@ class ManageServices:
                 phone = phone,
                 address = address,
                 city = city,
+                state = state,
                 country = country,
                 postal_code = postal_code
                 )

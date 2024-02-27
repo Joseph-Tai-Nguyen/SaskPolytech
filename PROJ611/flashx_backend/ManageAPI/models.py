@@ -29,6 +29,7 @@ class Store(Base):
     phone = models.CharField(max_length=20, null=True)
     address = models.CharField(max_length=200, null=True)
     city = models.CharField(max_length=100, null=True)
+    state = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=100, null=True)
     postal_code = models.CharField(max_length=20, null=True)
 

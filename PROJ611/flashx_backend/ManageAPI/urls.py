@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import StaffViewSet, obtain_auth_token, login, logout, GroupViewSet, OwnerViewSet, DeliveryViewSet, InvoiceViewSet, set_password
+from .views import StaffViewSet, obtain_auth_token, login, logout, GroupViewSet, OwnerViewSet, DeliveryViewSet, InvoiceViewSet, set_password, StoreViewSet
 
 
 router = DefaultRouter()
@@ -9,6 +9,7 @@ router.register(r'owner', OwnerViewSet, basename='owner')
 router.register(r'staff', StaffViewSet, basename='staff')
 router.register(r'delivery', DeliveryViewSet, basename='delivery')
 router.register(r'invoice', InvoiceViewSet, basename='invoice')
+router.register(r'store', StoreViewSet, basename='store')
 
 
 urlpatterns = [

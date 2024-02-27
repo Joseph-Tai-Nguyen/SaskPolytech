@@ -23,7 +23,7 @@ def login(request):
     password = request.data['password']
     user = authenticate(username=username, password=password)
     if user is not None:
-        user.last_login = timezone.now
+        user.last_login = timezone.datetime.now()
         user.save()
         token, obj = Token.objects.get_or_create(user=user)
         group = GroupSerializer(user.groups.filter(user=user), many=True).data
@@ -95,10 +95,11 @@ def set_password(request):
 
 
 class OwnerViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAdmin]
     serializer_class = OwnerSerializer
-    queryset = User.objects.all().filter(is_staff=True)
-
+    queryset =  User.objects.all().filter(is_staff=True)
+    
     def create(self, request, *args, **kwargs):
         data = request.data
 
@@ -584,3 +585,22 @@ class InvoiceViewSet(ModelViewSet):
     serializer_class = InvoiceSerializer
     queryset = Invoice.objects.all()
 
+
+class StoreViewSet(ModelViewSet):
+    permissions_classes = [IsAuthenticated]
+    serializer_class = StoreSerializer
+    queryset = Store.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        new_store = services.ManageServices.create_store(request.data)
+        if new_store is not None:
+            print(new_store)
+            return Response(
+                {'store': new_store.id},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {'error': 'Store creation failed.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
