@@ -74,8 +74,8 @@ class ManageServices:
                 last_name=last_name,
                 is_admin=is_admin,
                 is_active=is_active,
-                is_staff=True
-                # group_name=group_name
+                # is_staff=True
+                group_name=group_name
             )
             group = ManageServices.get_group(name=group_name)
             user.groups.add(group)
@@ -131,6 +131,16 @@ class ManageServices:
     def get_group(name):
         return models.Group.objects.get(name=name)
     
+    def create_storestaff(storeid, userid):
+        try:
+            store = models.Store.objects.get(id=storeid)
+            staff = models.User.objects.get(id=userid)
+            storestaff = models.Store_Staff.objects.create(store=store, user=staff)
+            return storestaff
+        except Exception as e:
+            print(e)
+            return None
+
     def create_store(data):
         try:
             store_name = data['store_name']
@@ -140,8 +150,8 @@ class ManageServices:
             state = data['state']
             country = data['country']
             postal_code = data['postal_code']
-            owner = models.User.objects.get(id=data['owner_id'])
-            new_store = models.Store.objects.get_or_create(
+            owner_id = data['owner_id']
+            new_store, created = models.Store.objects.get_or_create(
                 store_name = store_name,
                 phone = phone,
                 address = address,
@@ -151,12 +161,11 @@ class ManageServices:
                 postal_code = postal_code
                 )
 
-            result = models.Store_Staff.objects.create(
-                store=new_store,
-                user=owner
-                )
-
-            return result
+            if created:
+                result = ManageServices.create_storestaff(new_store.id, owner_id)
+                return result
+            else:
+                return None
         except Exception as e:
             print(e)
             return None

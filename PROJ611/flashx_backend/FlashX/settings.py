@@ -14,7 +14,8 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-134!-9itt&#9esj4a*h1kzx!j(1oqxwckn&$5lk*k!5+-nywcg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -83,10 +84,10 @@ ASGI_APPLICATION = 'FlashX.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'flashx', #'flashx', #
-        'USER': 'postgres', #'postgres', #
-        'PASSWORD': 'pass', #'pass', #
-        'HOST': 'localhost', #'localhost', #
+        'NAME': '', #'', #
+        'USER': '', #'', #
+        'PASSWORD': '', #'', #
+        'HOST': '', #'localhost', #
         'PORT': '5432',
     }
 }
@@ -124,6 +125,8 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
+
+USE_L10N = True
 
 USE_TZ = True
 

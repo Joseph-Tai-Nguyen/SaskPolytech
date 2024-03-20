@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import obtain_auth_token, ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, action
 from ManageAPI import services
@@ -279,7 +279,7 @@ class StaffViewSet(ModelViewSet):
         if result is not None:
             return Response(status=status.HTTP_202_ACCEPTED)
         else:
-            return Response({'error': 'Fail to update tutor.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Fail to update staff.'}, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         staffid = kwargs['pk']
@@ -406,7 +406,7 @@ class DeliveryViewSet(ModelViewSet):
         data = request.data
 
         result = services.ManageServices.create_delivery(
-            username=data['email'],
+            username=data['username'],
             password=data['password'],
             email=data['email'],
             first_name=data['first_name'],
@@ -425,7 +425,7 @@ class DeliveryViewSet(ModelViewSet):
 
         result = services.ManageServices.update_staff_delivery(
             id=deliveryid,
-            username=data['email'],
+            username=data['username'],
             # password=data['password'],
             email=data['email'],
             first_name=data['first_name'],
@@ -456,7 +456,7 @@ class DeliveryViewSet(ModelViewSet):
         # delete cascade Delivery
         delivery.user.delete()
 
-        return Response({'status': 'Student deleted'}, status=status.HTTP_200_OK)
+        return Response({'status': 'Delivery deleted'}, status=status.HTTP_200_OK)
 
     # @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated, ])
     # def courses(self, request):
@@ -585,6 +585,20 @@ class InvoiceViewSet(ModelViewSet):
     serializer_class = InvoiceSerializer
     queryset = Invoice.objects.all()
 
+    def create(self, request, *args, **kwargs):
+        new_invoice = services.ManageServices.create_invoice(request.data)
+        if new_invoice is not None:
+            print(new_invoice)
+            return Response(
+                {'invoice': new_invoice[0].id},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            return Response(
+                {'error': 'Invoice creation failed.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
 
 class StoreViewSet(ModelViewSet):
     permissions_classes = [IsAuthenticated]
@@ -602,5 +616,11 @@ class StoreViewSet(ModelViewSet):
         else:
             return Response(
                 {'error': 'Store creation failed.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def update(self, request, *args, **kwargs):
+        return Response(
+                {'error': 'test'},
                 status=status.HTTP_400_BAD_REQUEST
             )
